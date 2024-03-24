@@ -1,10 +1,22 @@
 import mongoose from "mongoose";
 import Post from "../models/PostsModel.js";
+import User from "../models/UserModel.js";
 
 const getPosts = async (req, res) => {
   try {
     const posts = await Post.find();
     res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getUserPosts = async (req, res) => {
+  //Grab the authenticated user from request body
+  const user = await User.findById(req.user._id);
+  try {
+    const userPosts = await Post.find({ user: user._id });
+    res.status(200).json(userPosts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -21,8 +33,11 @@ const addPosts = async (req, res) => {
     });
   }
 
+  //Grab the authenticated user from request body
+  const user = await User.findById(req.user._id);
+
   try {
-    const post = await Post.create({ title, body });
+    const post = await Post.create({ user: user._id, title, body });
     res.status(200).json({
       success: "post request successful",
       post,
@@ -48,7 +63,11 @@ const deletePosts = async (req, res) => {
       error: "post not found",
     });
   }
-
+  //check the user owns the post
+  const user = await User.findById(req.user._id);
+  if (!post.user.equals(user._id)) {
+    return res.status(404).json({ error: "Not authorized" });
+  }
   try {
     await post.deleteOne();
     res.status(200).json({
@@ -85,6 +104,11 @@ const updatePost = async (req, res) => {
     });
   }
 
+  //check the user owns the post
+  const user = await User.findById(req.user._id);
+  if (!post.user.equals(user._id)) {
+    return res.status(404).json({ error: "Not authorized" });
+  }
   try {
     await post.updateOne({ title, body });
     res.status(200).json({
@@ -95,4 +119,4 @@ const updatePost = async (req, res) => {
   }
 };
 
-export { getPosts, addPosts, deletePosts, updatePost };
+export { getPosts, getUserPosts, addPosts, deletePosts, updatePost };
