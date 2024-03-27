@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import "dotenv/config.js";
 import { postsRoutes } from "./routes/postsRoutes.js";
 import { usersRoutes } from "./routes/usersRoutes.js";
 
@@ -11,8 +12,8 @@ app.use("/api/posts", postsRoutes);
 app.use("/api/users", usersRoutes);
 
 mongoose
-  .connect("mongodb+srv://chirantha:12345@cluster0.xcmczoo.mongodb.net/", {
-    dbName: "demo_db",
+  .connect(process.env.MONGO_DB_URL, {
+    dbName: process.env.DB,
   })
   .then(() => {
     console.log("Connected to DB Successfully");
