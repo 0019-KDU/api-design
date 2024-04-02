@@ -4,7 +4,7 @@ import User from "../models/UserModel.js";
 
 const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().sort({ createdAt: "desc" });
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -15,7 +15,9 @@ const getUserPosts = async (req, res) => {
   //Grab the authenticated user from request body
   const user = await User.findById(req.user._id);
   try {
-    const userPosts = await Post.find({ user: user._id });
+    const userPosts = await Post.find({ user: user._id }).sort({
+      createdAt: "desc",
+    });
     res.status(200).json(userPosts);
   } catch (error) {
     res.status(500).json({ error: error.message });
